@@ -1,0 +1,13 @@
+title = "SentinelVault Secret Scan Rules"
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api_key|apikey|secret|password|token)[\s:=]+['"]?[a-z0-9-_]{16,}['"]?'''
+tags = ["key", "secret"]
+
+[[rules]]
+id = "aws-access-key"
+description = "AWS Access Key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["aws", "key"]
