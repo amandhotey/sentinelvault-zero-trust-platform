@@ -27,17 +27,7 @@ Secure → Monitor → Detect → Respond
 
 ## 🏗️ Architecture
 
-
-Application
-↓
-HashiCorp Vault (Secrets Control Plane)
-↓
-Audit + Access Logs
-↓
-ML Anomaly Detection (Isolation Forest)
-↓
-Auto-Remediation Engine
-
+![SentinelVault Architecture](docs/architecture.png)
 
 ---
 
