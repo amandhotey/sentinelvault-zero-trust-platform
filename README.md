@@ -139,7 +139,7 @@ Zero Trust Architecture
 
 📸 Demo Preview
 
-![Dashboard](docs/dashboard.png)
+![Dashboard](https://raw.githubusercontent.com/amandhotey/sentinelvault-zero-trust-security/main/docs/dashboard.png)
 
 🚀 Future Enhancements
 
