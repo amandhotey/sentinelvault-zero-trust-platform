@@ -1,31 +1,90 @@
+# ============================================
+# SentinelVault ML Anomaly Detection Engine
+# ============================================
+
+import os
 import pandas as pd
-import joblib
+import requests
+from sklearn.ensemble import IsolationForest
 
-DATASET = "ml-engine/data/access_dataset.csv"
-MODEL_PATH = "ml-engine/models/anomaly_model.pkl"
-OUTPUT_FILE = "ml-engine/data/anomaly_results.csv"
+# ============================================
+# PATH SETUP (WORKS FROM ANY DIRECTORY)
+# ============================================
 
-# Load dataset
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+DATASET = os.path.join(BASE_DIR, "data", "access_dataset.csv")
+OUTPUT = os.path.join(BASE_DIR, "data", "anomaly_results.csv")
+
+# API endpoint (app.py)
+ANOMALY_API = "http://localhost:5000/anomaly"
+
+# ============================================
+# LOAD DATASET
+# ============================================
+
+print("📂 Loading dataset...")
+
 df = pd.read_csv(DATASET)
 
-# Load trained model
-model = joblib.load(MODEL_PATH)
+# ============================================
+# FEATURE SELECTION
+# ============================================
 
-print("Model loaded successfully")
+features = df[["hour", "minute", "secret", "action"]]
 
-# Predict anomalies
-predictions = model.predict(df)
-scores = model.decision_function(df)
+# ============================================
+# TRAIN MODEL
+# ============================================
 
-df["anomaly"] = predictions
-df["risk_score"] = scores
+print("🤖 Training Isolation Forest model...")
 
-# Save results
-df.to_csv(OUTPUT_FILE, index=False)
+model = IsolationForest(
+    n_estimators=100,
+    contamination=0.1,
+    random_state=42
+)
+
+model.fit(features)
+
+print("✅ Model loaded successfully")
+
+# ============================================
+# DETECT ANOMALIES
+# ============================================
+
+df["anomaly"] = model.predict(features)
+df["risk_score"] = model.decision_function(features)
+
+# anomaly = -1 means suspicious
+anomalies = df[df["anomaly"] == -1]
+
+# ============================================
+# SAVE RESULTS
+# ============================================
+
+df.to_csv(OUTPUT, index=False)
 
 print("\nDetection complete.")
-print("Results saved to:", OUTPUT_FILE)
+print(f"Results saved to: {OUTPUT}")
 
-# Show anomalies
-print("\n⚠️ Detected Anomalies:")
-print(df[df["anomaly"] == -1])
+# ============================================
+# SEND ALERTS TO MONITORING APP
+# ============================================
+
+if not anomalies.empty:
+    print("\n⚠️ Detected Anomalies:")
+
+    print(anomalies[["hour", "minute", "secret",
+                     "action", "anomaly", "risk_score"]])
+
+    print("\n🚨 Sending anomalies to SentinelVault monitoring...")
+
+    for _, row in anomalies.iterrows():
+        try:
+            requests.post(ANOMALY_API, timeout=2)
+            print("✅ Alert sent")
+        except Exception as e:
+            print("❌ Failed to notify app:", e)
+
+else:
+    print("\n✅ No anomalies detected.")

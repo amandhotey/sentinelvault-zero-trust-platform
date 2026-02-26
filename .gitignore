@@ -1,26 +1,23 @@
 # Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 venv/
 .env
 
-# Logs
-logs/
-*.log
+# Data files
+ml-engine/data/*.csv
 
-# ML artifacts
-ml-engine/data/
-ml-engine/models/
+# Models
+*.pkl
+*.joblib
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# VS Code
+# IDE
 .vscode/
+.idea/
 
-# Vault local data
-*.db
-*.sqlite
+# Docker volumes
+data/
